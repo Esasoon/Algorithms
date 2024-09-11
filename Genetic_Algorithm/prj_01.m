@@ -1,0 +1,86 @@
+% 遗传算法求解 MIN f(x)=(x-3)^2 
+% Written By Easoom
+
+clear;
+% 进化参数
+times = 35; % 迭代次数
+Pm = 1/4; % 变异概率
+Nums = 4; % 个体数目
+WayOfcoding = 0; % 0:格雷码; 1:二进制
+WayofSelect = 0; % 0:轮盘赌; 1:锦标赛
+IsDraw = 0;      % 0:关闭; 1:开启动态绘图
+% 自变量x范围
+x=double(0:15);
+y=f(x);
+
+% 性能测试
+TestTimes = 1000;
+TestDate = zeros(TestTimes,2);  % 耗时,最优解
+
+for IndexOfTest = 1:TestTimes
+    
+    TimeOfIter = @() main_fun(times,Pm,Nums,WayOfcoding,WayofSelect,IsDraw,x); % 耗时计算
+    TestDate(IndexOfTest,1) = timeit(TimeOfIter);
+    
+    TestDate(IndexOfTest,2) = main_fun(times,Pm,Nums,WayOfcoding,WayofSelect,IsDraw,x);
+end
+
+% 计算平均运行时间
+MeanTime = mean(TestDate(:, 1)); 
+
+% 计算平均最优解
+MeanBest = mean(TestDate(:, 2)); 
+
+% 计算标准差
+Dstd = std(TestDate(:, 2));  
+% 计算相对标准差
+Drsd = (Dstd / MeanBest) * 100; 
+
+% 计算最优解率
+CountOfBest = sum(TestDate(:, 2) == 3);
+POfBest = 100*(CountOfBest / size(TestDate, 1));
+
+% 打印结果
+
+% 显示编码方式
+if WayOfcoding
+    CodingMethod = "二进制编码";
+else
+    CodingMethod = "格雷码编码";
+end
+
+% 显示选择方式
+if WayofSelect
+    SelectionMethod = "锦标赛";
+else
+    SelectionMethod = "轮盘赌";
+end
+
+fprintf("编码方式：%s \n", CodingMethod);
+fprintf("选择方式：%s \n", SelectionMethod);
+
+ResultsTable = table(times, MeanTime, POfBest, MeanBest, Dstd, Drsd, ...
+    'VariableNames', {'迭代次数', '平均运行时间(s)', '最优解率(%)', '平均最优解', '标准差', '相对标准差(%)'});
+% 显示表格
+disp(ResultsTable);
+
+
+% 绘制结果分析
+figure(2);
+x_result = 1:TestTimes;
+% 绘制迭代耗时
+subplot(2, 1, 1);  
+plot(x_result, TestDate(:,1), 'r-o');  
+title('耗时');
+xlabel('X 轴');
+ylabel('Y 轴');
+
+% 绘制迭代结果
+subplot(2, 1, 2);  
+plot(x_result, TestDate(:,2), 'g-*');  
+title('迭代结果');
+xlabel('X 轴');
+ylabel('Y 轴');
+
+
+
